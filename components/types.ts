@@ -71,3 +71,54 @@ export type HeaderProps = {
   avatar: string;
   onMenuClick: () => void;
 };
+
+// Admin types
+export type AdminMetric = {
+  title: string;
+  value: string;
+  icon: any;
+  change: string;
+};
+
+export type AdminUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  avatar: string;
+};
+
+export type AdminChartData = {
+  month: string;
+  estudiantes: number;
+  cursos: number;
+};
+
+export type AdminPieData = {
+  name: string;
+  value: number;
+  color: string;
+};
+
+export type AdminActivity = {
+  user: string;
+  action: string;
+  course: string;
+  time: string;
+};
+
+export type AdminSidebarProps = {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+  onLogout: () => void;
+  isOpen: boolean;
+  setOpen: (isOpen: boolean) => void;
+};
+
+export type AdminHeaderProps = {
+  adminName: string;
+  adminEmail: string;
+  avatar: string;
+  onMenuClick: () => void;
+};

@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
+import { useRouter } from "next/navigation" // Import useRouter
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -14,8 +15,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState({ email: "", password: "" })
+  const [errors, setErrors] = useState({ email: "", password: "", form: "" })
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter() // Initialize router
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -24,10 +26,10 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setErrors({ email: "", password: "" })
+    setErrors({ email: "", password: "", form: "" })
 
     // Client-side validation
-    const newErrors = { email: "", password: "" }
+    const newErrors = { email: "", password: "", form: "" }
 
     if (!email) {
       newErrors.email = "El correo electrónico es requerido"
@@ -37,8 +39,6 @@ export default function LoginPage() {
 
     if (!password) {
       newErrors.password = "La contraseña es requerida"
-    } else if (password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres"
     }
 
     if (newErrors.email || newErrors.password) {
@@ -48,18 +48,42 @@ export default function LoginPage() {
 
     setIsLoading(true)
 
-    // Simulate login process with enhanced feedback
-    setTimeout(() => {
-      // Role-based redirection
-      if (email.endsWith("@mtiglobaltech.com")) {
-        console.log("[v0] Admin login detected, redirecting to admin panel")
-        window.location.href = "/admin"
+    try {
+            // La URL ahora apunta a la ruta de login dentro de nuestra app de usuarios.
+      const response = await fetch("http://127.0.0.1:8000/api/users/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        localStorage.setItem("accessToken", data.access)
+        localStorage.setItem("refreshToken", data.refresh)
+
+        // Role-based redirection
+        if (data.user && data.user.rol === "administrador") {
+          router.push("/admin")
+        } else {
+          router.push("/dashboard")
+        }
       } else {
-        console.log("[v0] Student login detected, redirecting to dashboard")
-        window.location.href = "/dashboard"
+        const errorData = await response.json()
+        // Handle specific error messages from the backend if available
+        if (errorData.detail) {
+          setErrors({ ...newErrors, form: errorData.detail })
+        } else {
+          setErrors({ ...newErrors, form: "Credenciales inválidas. Por favor, inténtalo de nuevo." })
+        }
       }
+    } catch (error) {
+      console.error("Login error:", error)
+      setErrors({ ...newErrors, form: "No se pudo conectar al servidor. Inténtalo más tarde." })
+    } finally {
       setIsLoading(false)
-    }, 2000)
+    }
   }
 
   return (
@@ -109,6 +133,13 @@ export default function LoginPage() {
 
         <CardContent className="px-8 pb-8">
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* General form error */}
+            {errors.form && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg text-center text-sm font-semibold" role="alert">
+                {errors.form}
+              </div>
+            )}
+
             {/* Email field */}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-semibold text-[#123C69] flex items-center gap-2">
