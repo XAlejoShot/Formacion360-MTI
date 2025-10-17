@@ -250,7 +250,13 @@ export default function LoginPage() {
           </form>
 
           {/* Enhanced footer */}
-          <div className="mt-6 pt-6 border-t border-gray-200/60 text-center">
+          <div className="mt-6 pt-6 border-t border-gray-200/60 text-center space-y-4">
+            <p className="text-sm text-gray-600">
+                ¿No tienes una cuenta?{" "}
+                <a href="/register" className="font-semibold text-[#123C69] hover:text-[#ACD157] hover:underline">
+                    Regístrate aquí
+                </a>
+            </p>
             <p className="text-xs text-gray-500 flex items-center justify-center gap-2">
               Powered by
               <span className="font-semibold text-[#123C69] flex items-center gap-1">
